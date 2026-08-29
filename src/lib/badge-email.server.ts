@@ -26,7 +26,7 @@ export async function sendBadgeMail(input: BadgeMailInput): Promise<BadgeEmailRe
     };
   }
 
-  const from = process.env["EMAIL_FROM"] || "NCS Delegate Desk <onboarding@resend.dev>";
+  const from = process.env["EMAIL_FROM"] || "onboarding@resend.dev";
 
   try {
     const { data, error } = await resend.emails.send({
