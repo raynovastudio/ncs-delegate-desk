@@ -168,28 +168,29 @@ function Dashboard() {
   }
 
   const stats = [
-    { label: "Registered participants", value: participants.length, icon: Users },
+    { label: "Registered", value: participants.length, icon: Users, color: "bg-primary/10 text-primary" },
     {
-      label: "Badges emailed",
+      label: "Badges sent",
       value: participants.filter((p) => p.email_sent).length,
       icon: Mail,
+      color: "bg-success/10 text-success",
     },
-    { label: "Checked in at venue", value: checkedInIds.size, icon: CheckCircle2 },
-    { label: "Total scans", value: checkInsQuery.data?.length ?? 0, icon: QrCode },
+    { label: "Checked in", value: checkedInIds.size, icon: CheckCircle2, color: "bg-accent text-accent-foreground" },
+    { label: "Total scans", value: checkInsQuery.data?.length ?? 0, icon: QrCode, color: "bg-secondary text-secondary-foreground" },
   ];
 
   return (
     <AppShell>
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-primary">
+          <p className="text-xs font-bold uppercase tracking-[0.25em] text-primary">
             {CONFERENCE.theme} · {CONFERENCE.venue}
           </p>
-          <h1 className="mt-2 text-2xl font-semibold sm:text-3xl">{CONFERENCE.edition}</h1>
+          <h1 className="mt-2 text-2xl font-bold sm:text-3xl">{CONFERENCE.edition}</h1>
         </div>
         <Dialog open={addOpen} onOpenChange={setAddOpen}>
           <DialogTrigger asChild>
-            <Button>
+            <Button size="lg" className="shadow-lg">
               <UserPlus className="size-4" /> Add participant
             </Button>
           </DialogTrigger>
@@ -202,19 +203,21 @@ function Dashboard() {
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {stats.map((s) => (
-          <div key={s.label} className="panel p-5">
+          <div key={s.label} className="panel p-5 transition-shadow hover:shadow-lg">
             <div className="flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">{s.label}</p>
-              <s.icon className="size-4 text-primary" />
+              <p className="text-sm font-medium text-muted-foreground">{s.label}</p>
+              <span className={`flex size-9 items-center justify-center rounded-xl ${s.color}`}>
+                <s.icon className="size-4" />
+              </span>
             </div>
-            <p className="mt-3 font-display text-3xl font-semibold">{s.value}</p>
+            <p className="mt-3 font-display text-3xl font-bold">{s.value}</p>
           </div>
         ))}
       </div>
 
       <div className="panel mt-6 overflow-hidden">
-        <div className="flex flex-col gap-3 border-b border-border p-4 sm:flex-row sm:items-center sm:justify-between">
-          <h2 className="font-display text-lg font-semibold">Participants</h2>
+        <div className="flex flex-col gap-3 border-b border-border bg-muted/30 p-4 sm:flex-row sm:items-center sm:justify-between">
+          <h2 className="font-display text-lg font-bold">Participants</h2>
           <div className="relative sm:w-72">
             <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
