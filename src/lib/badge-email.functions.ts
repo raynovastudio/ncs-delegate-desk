@@ -1,6 +1,4 @@
 import { createServerFn } from "@tanstack/react-start";
-import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-
 import { sendBadgeMail } from "./badge-email.server";
 
 export type BadgeEmailResult = {
@@ -11,25 +9,25 @@ export type BadgeEmailResult = {
 
 /**
  * Emails one participant their personal QR badge.
- * The caller must be a signed-in secretariat team member.
  */
 export const sendBadgeEmail = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
   .validator((input: { participantId: string; origin: string }) => input)
-  .handler(async ({ data, context }): Promise<BadgeEmailResult> => {
-    const { supabase, userId } = context;
+  .handler(async ({ data }): Promise<BadgeEmailResult> => {
+    const supabaseUrl = process.env["SUPABASE_URL"] || "";
+    const supabaseKey = process.env["SUPABASE_SERVICE_ROLE_KEY"] || process.env["SUPABASE_ANON_KEY"] || "";
 
-    const { data: isTeam } = await supabase.rpc("is_team_member", { _user_id: userId });
-    if (!isTeam) return { sent: false, reason: "error", message: "Not authorised." };
+    const response = await fetch(`${supabaseUrl}/rest/v1/participants?id=eq.${data.participantId}&select=id,full_name,email,category,registration_code,qr_token`, {
+      headers: {
+        apikey: supabaseKey,
+        Authorization: `Bearer ${supabaseKey}`,
+      },
+    });
 
-    const { data: participant, error } = await supabase
-      .from("participants")
-      .select("id, full_name, email, category, registration_code, qr_token")
-      .eq("id", data.participantId)
-      .maybeSingle();
+    const participants = await response.json();
+    const participant = participants?.[0];
 
-    if (error || !participant) {
-      return { sent: false, reason: "error", message: error?.message ?? "Participant not found." };
+    if (!participant) {
+      return { sent: false, reason: "error", message: "Participant not found." };
     }
 
     const origin = data.origin.replace(/\/$/, "");
@@ -43,10 +41,15 @@ export const sendBadgeEmail = createServerFn({ method: "POST" })
     });
 
     if (result.sent) {
-      await supabase
-        .from("participants")
-        .update({ email_sent: true, email_sent_at: new Date().toISOString() })
-        .eq("id", participant.id);
+      await fetch(`${supabaseUrl}/rest/v1/participants?id=eq.${participant.id}`, {
+        method: "PATCH",
+        headers: {
+          apikey: supabaseKey,
+          Authorization: `Bearer ${supabaseKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email_sent: true, email_sent_at: new Date().toISOString() }),
+      });
     }
 
     return result;

@@ -55,10 +55,10 @@ function buildBadgeHtml(input: BadgeMailInput): string {
       <td align="center">
         <table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
           <tr>
-            <td style="background:linear-gradient(135deg,#0c3d54 0%,#066aab 100%);padding:28px 32px;">
-              <p style="margin:0;font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,0.6);">Nigerian Cardiac Society</p>
-              <p style="margin:6px 0 0;font-size:20px;font-weight:600;color:#ffffff;">55th AGM &amp; Scientific Conference</p>
-              <p style="margin:4px 0 0;font-size:13px;color:rgba(255,255,255,0.7);">EKO 2026 · Lagos, Nigeria</p>
+            <td style="background:linear-gradient(135deg,#E31E24 0%,#00843D 100%);padding:28px 32px;">
+              <p style="margin:0;font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,0.7);">Nigerian Cardiac Society</p>
+              <p style="margin:6px 0 0;font-size:20px;font-weight:700;color:#ffffff;">55th AGM &amp; Scientific Conference</p>
+              <p style="margin:4px 0 0;font-size:13px;color:rgba(255,255,255,0.85);">EKO 2026 · Lagos, Nigeria</p>
             </td>
           </tr>
           <tr>
@@ -72,8 +72,8 @@ function buildBadgeHtml(input: BadgeMailInput): string {
               <table width="100%" cellpadding="0" cellspacing="0" style="margin:24px 0;background:#f8fafb;border:1px solid #e2e8f0;border-radius:8px;">
                 <tr>
                   <td style="padding:20px;text-align:center;">
-                    <p style="margin:0 0 4px;font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:#066aab;font-weight:600;">Registration Code</p>
-                    <p style="margin:0;font-size:22px;font-weight:700;color:#0c3d54;letter-spacing:0.05em;">${input.registrationCode}</p>
+                    <p style="margin:0 0 4px;font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:#E31E24;font-weight:600;">Registration Code</p>
+                    <p style="margin:0;font-size:22px;font-weight:700;color:#1a1a2e;letter-spacing:0.05em;">${input.registrationCode}</p>
                     <p style="margin:8px 0 0;font-size:12px;text-transform:capitalize;color:#64748b;">${input.category}</p>
                   </td>
                 </tr>

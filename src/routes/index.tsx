@@ -1,7 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CheckCircle2, Loader2, Mail, QrCode, Search, Send, UserPlus, Users } from "lucide-react";
+import {
+  CheckCircle2,
+  Loader2,
+  Mail,
+  QrCode,
+  Search,
+  Send,
+  SendHorizontal,
+  UserPlus,
+  Users,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { AppShell } from "@/components/AppShell";
@@ -37,6 +47,7 @@ import {
 } from "@/components/ui/table";
 import { supabase } from "@/integrations/supabase/client";
 import { CATEGORIES, CONFERENCE, type Category } from "@/lib/conference";
+import { sendBadgeEmail } from "@/lib/badge-email.functions";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -79,6 +90,8 @@ function Dashboard() {
   const [badge, setBadge] = useState<BadgeParticipant | null>(null);
   const [addOpen, setAddOpen] = useState(false);
   const [sendingId, setSendingId] = useState<string | null>(null);
+  const [bulkSending, setBulkSending] = useState(false);
+  const [bulkProgress, setBulkProgress] = useState({ sent: 0, failed: 0, total: 0 });
 
   const participantsQuery = useQuery({
     queryKey: ["participants"],
@@ -153,18 +166,47 @@ function Dashboard() {
   async function handleSend(p: Participant) {
     setSendingId(p.id);
     try {
-      const { error } = await supabase
-        .from("participants")
-        .update({ email_sent: true, email_sent_at: new Date().toISOString() })
-        .eq("id", p.id);
-      if (error) throw error;
-      toast.success(`Badge marked as sent for ${p.email}`);
+      const result = await sendBadgeEmail({
+        data: { participantId: p.id, origin: window.location.origin },
+      });
+      if (result.sent) {
+        toast.success(`Badge emailed to ${p.email}`);
+      } else {
+        toast.warning(result.message || "Email could not be sent");
+      }
       void qc.invalidateQueries({ queryKey: ["participants"] });
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Could not update badge status");
+      toast.error(e instanceof Error ? e.message : "Could not send badge email");
     } finally {
       setSendingId(null);
     }
+  }
+
+  async function handleBulkSend() {
+    const unsent = participants.filter((p) => !p.email_sent && p.email);
+    if (unsent.length === 0) {
+      toast.info("All participants have already been emailed.");
+      return;
+    }
+    setBulkSending(true);
+    setBulkProgress({ sent: 0, failed: 0, total: unsent.length });
+    let sent = 0;
+    let failed = 0;
+    for (const p of unsent) {
+      try {
+        const result = await sendBadgeEmail({
+          data: { participantId: p.id, origin: window.location.origin },
+        });
+        if (result.sent) sent++;
+        else failed++;
+      } catch {
+        failed++;
+      }
+      setBulkProgress({ sent, failed, total: unsent.length });
+    }
+    setBulkSending(false);
+    void qc.invalidateQueries({ queryKey: ["participants"] });
+    toast.success(`Bulk send complete: ${sent} sent, ${failed} failed`);
   }
 
   const stats = [
@@ -188,17 +230,34 @@ function Dashboard() {
           </p>
           <h1 className="mt-2 text-2xl font-bold sm:text-3xl">{CONFERENCE.edition}</h1>
         </div>
-        <Dialog open={addOpen} onOpenChange={setAddOpen}>
-          <DialogTrigger asChild>
-            <Button size="lg" className="shadow-lg">
-              <UserPlus className="size-4" /> Add participant
-            </Button>
-          </DialogTrigger>
+        <div className="flex items-center gap-3">
+          <Button
+            variant="destructive"
+            size="lg"
+            disabled={bulkSending}
+            onClick={() => void handleBulkSend()}
+          >
+            {bulkSending ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <SendHorizontal className="size-4" />
+            )}
+            {bulkSending
+              ? `Sending ${bulkProgress.sent + bulkProgress.failed}/${bulkProgress.total}…`
+              : `Send all emails`}
+          </Button>
+          <Dialog open={addOpen} onOpenChange={setAddOpen}>
+            <DialogTrigger asChild>
+              <Button size="lg" className="shadow-lg">
+                <UserPlus className="size-4" /> Add participant
+              </Button>
+            </DialogTrigger>
           <AddParticipantDialog
             pending={addMutation.isPending}
             onSubmit={(v) => addMutation.mutate(v)}
           />
         </Dialog>
+        </div>
       </div>
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
