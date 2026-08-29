@@ -167,7 +167,15 @@ function Dashboard() {
     setSendingId(p.id);
     try {
       const result = await sendBadgeEmail({
-        data: { participantId: p.id, origin: window.location.origin },
+        data: {
+          participantId: p.id,
+          to: p.email,
+          fullName: p.full_name,
+          category: p.category,
+          registrationCode: p.registration_code,
+          qrToken: p.qr_token,
+          origin: window.location.origin,
+        },
       });
       if (result.sent) {
         toast.success(`Badge emailed to ${p.email}`);
