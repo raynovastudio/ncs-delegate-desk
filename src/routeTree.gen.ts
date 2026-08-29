@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ScanRouteImport } from './routes/scan'
+import { Route as SetupRouteImport } from './routes/setup'
 import { Route as ApiPublicQrTokenRouteImport } from './routes/api/public/qr.$token'
 
 const IndexRoute = IndexRouteImport.update({
@@ -29,6 +30,11 @@ const ScanRoute = ScanRouteImport.update({
   path: '/scan',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SetupRoute = SetupRouteImport.update({
+  id: '/setup',
+  path: '/setup',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicQrTokenRoute = ApiPublicQrTokenRouteImport.update({
   id: '/api/public/qr/$token',
   path: '/api/public/qr/$token',
@@ -39,12 +45,14 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/scan': typeof ScanRoute
+  '/setup': typeof SetupRoute
   '/api/public/qr/$token': typeof ApiPublicQrTokenRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/scan': typeof ScanRoute
+  '/setup': typeof SetupRoute
   '/api/public/qr/$token': typeof ApiPublicQrTokenRoute
 }
 export interface FileRoutesById {
@@ -52,20 +60,22 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/scan': typeof ScanRoute
+  '/setup': typeof SetupRoute
   '/api/public/qr/$token': typeof ApiPublicQrTokenRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/scan' | '/api/public/qr/$token'
+  fullPaths: '/' | '/auth' | '/scan' | '/setup' | '/api/public/qr/$token'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/scan' | '/api/public/qr/$token'
-  id: '__root__' | '/' | '/auth' | '/scan' | '/api/public/qr/$token'
+  to: '/' | '/auth' | '/scan' | '/setup' | '/api/public/qr/$token'
+  id: '__root__' | '/' | '/auth' | '/scan' | '/setup' | '/api/public/qr/$token'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
   ScanRoute: typeof ScanRoute
+  SetupRoute: typeof SetupRoute
   ApiPublicQrTokenRoute: typeof ApiPublicQrTokenRoute
 }
 
@@ -92,6 +102,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ScanRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/setup': {
+      id: '/setup'
+      path: '/setup'
+      fullPath: '/setup'
+      preLoaderRoute: typeof SetupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/qr/$token': {
       id: '/api/public/qr/$token'
       path: '/api/public/qr/$token'
@@ -106,6 +123,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
   ScanRoute: ScanRoute,
+  SetupRoute: SetupRoute,
   ApiPublicQrTokenRoute: ApiPublicQrTokenRoute,
 }
 export const routeTree = rootRouteImport

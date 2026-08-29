@@ -35,10 +35,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useRequireTeam } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { CATEGORIES, CONFERENCE, type Category } from "@/lib/conference";
-import { sendBadgeEmail } from "@/lib/badge-email.functions";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -76,18 +74,14 @@ type Participant = {
 };
 
 function Dashboard() {
-  const { session, loading, isTeam, rolesLoaded } = useRequireTeam();
   const qc = useQueryClient();
   const [search, setSearch] = useState("");
   const [badge, setBadge] = useState<BadgeParticipant | null>(null);
   const [addOpen, setAddOpen] = useState(false);
   const [sendingId, setSendingId] = useState<string | null>(null);
 
-  const enabled = !!session && isTeam;
-
   const participantsQuery = useQuery({
     queryKey: ["participants"],
-    enabled,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("participants")
@@ -102,7 +96,6 @@ function Dashboard() {
 
   const checkInsQuery = useQuery({
     queryKey: ["check-ins"],
-    enabled,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("check_ins")
@@ -146,7 +139,6 @@ function Dashboard() {
         organisation: values.organisation || null,
         category: values.category,
         notes: values.notes || null,
-        created_by: session?.user?.id ?? null,
       });
       if (error) throw error;
     },
@@ -161,44 +153,18 @@ function Dashboard() {
   async function handleSend(p: Participant) {
     setSendingId(p.id);
     try {
-      const res = await sendBadgeEmail({
-        data: { participantId: p.id, origin: window.location.origin },
-      });
-      if (res.sent) {
-        toast.success(`Badge emailed to ${p.email}`);
-        void qc.invalidateQueries({ queryKey: ["participants"] });
-      } else if (res.reason === "email_not_configured") {
-        toast.warning("Email sending isn't switched on yet — set up the conference sender domain.");
-      } else {
-        toast.error(res.message ?? "Could not send badge email");
-      }
+      const { error } = await supabase
+        .from("participants")
+        .update({ email_sent: true, email_sent_at: new Date().toISOString() })
+        .eq("id", p.id);
+      if (error) throw error;
+      toast.success(`Badge marked as sent for ${p.email}`);
+      void qc.invalidateQueries({ queryKey: ["participants"] });
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Could not send badge email");
+      toast.error(e instanceof Error ? e.message : "Could not update badge status");
     } finally {
       setSendingId(null);
     }
-  }
-
-  if (loading || (session && !rolesLoaded)) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <Loader2 className="size-6 animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
-
-  if (session && rolesLoaded && !isTeam) {
-    return (
-      <AppShell email={session.user.email}>
-        <div className="panel mx-auto max-w-lg p-8 text-center">
-          <h1 className="font-display text-xl font-semibold">Awaiting access</h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Your account is not yet on the secretariat team list. Ask a conference administrator to
-            grant you desk access.
-          </p>
-        </div>
-      </AppShell>
-    );
   }
 
   const stats = [
@@ -213,7 +179,7 @@ function Dashboard() {
   ];
 
   return (
-    <AppShell email={session?.user.email}>
+    <AppShell>
       <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.28em] text-primary">
@@ -336,7 +302,7 @@ function Dashboard() {
                         ) : (
                           <Send className="size-4" />
                         )}
-                        <span className="hidden lg:inline">Email badge</span>
+                        <span className="hidden lg:inline">Send</span>
                       </Button>
                     </div>
                   </TableCell>

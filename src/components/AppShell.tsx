@@ -1,10 +1,8 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, LogOut, ScanLine } from "lucide-react";
+import { HeartPulse, LayoutDashboard, ScanLine } from "lucide-react";
 import type { ReactNode } from "react";
 
-import { Button } from "@/components/ui/button";
 import { CONFERENCE } from "@/lib/conference";
-import { signOut } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 
 const NAV = [
@@ -12,7 +10,7 @@ const NAV = [
   { to: "/scan", label: "Scan & check-in", icon: ScanLine },
 ] as const;
 
-export function AppShell({ children, email }: { children: ReactNode; email?: string | null }) {
+export function AppShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   return (
@@ -54,16 +52,6 @@ export function AppShell({ children, email }: { children: ReactNode; email?: str
                 );
               })}
             </nav>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => void signOut()}
-              className="text-navy-foreground/75 hover:bg-navy-foreground/10 hover:text-navy-foreground"
-              title={email ?? undefined}
-            >
-              <LogOut className="size-4" />
-              <span className="hidden lg:inline">Sign out</span>
-            </Button>
           </div>
         </div>
       </header>

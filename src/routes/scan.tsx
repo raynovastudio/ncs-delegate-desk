@@ -8,7 +8,6 @@ import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useRequireTeam } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { CONFERENCE, parseQrPayload } from "@/lib/conference";
 
@@ -49,7 +48,6 @@ type ScanState =
 const REGION_ID = "ncs-qr-region";
 
 function ScanPage() {
-  const { session, loading, isTeam, rolesLoaded } = useRequireTeam();
   const qc = useQueryClient();
   const [scanning, setScanning] = useState(false);
   const [state, setState] = useState<ScanState>({ kind: "idle" });
@@ -60,7 +58,6 @@ function ScanPage() {
 
   const recent = useQuery({
     queryKey: ["recent-check-ins"],
-    enabled: !!session && isTeam,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("check_ins")
@@ -79,8 +76,7 @@ function ScanPage() {
       return;
     }
     const now = Date.now();
-    if (lastRef.current && lastRef.current.token === token && now - lastRef.current.at < 4000)
-      return;
+    if (lastRef.current && lastRef.current.token === token && now - lastRef.current.at < 4000) return;
     lastRef.current = { token, at: now };
     if (busyRef.current) return;
     busyRef.current = true;
@@ -106,7 +102,6 @@ function ScanPage() {
 
       const { error: insertError } = await supabase.from("check_ins").insert({
         participant_id: participant.id,
-        checked_in_by: session?.user?.id ?? null,
       });
       if (insertError) throw insertError;
 
@@ -168,24 +163,12 @@ function ScanPage() {
     return () => {
       const s = scannerRef.current;
       scannerRef.current = null;
-      if (s)
-        void s
-          .stop()
-          .then(() => s.clear())
-          .catch(() => {});
+      if (s) void s.stop().then(() => s.clear()).catch(() => {});
     };
   }, []);
 
-  if (loading || (session && !rolesLoaded)) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <Loader2 className="size-6 animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
-
   return (
-    <AppShell email={session?.user.email}>
+    <AppShell>
       <div>
         <p className="text-xs font-semibold uppercase tracking-[0.28em] text-primary">
           {CONFERENCE.theme} · Venue entrance
@@ -199,10 +182,7 @@ function ScanPage() {
       <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
         <div className="panel overflow-hidden">
           <div className="relative aspect-square w-full bg-navy sm:aspect-video">
-            <div
-              id={REGION_ID}
-              className="absolute inset-0 [&_video]:size-full [&_video]:object-cover"
-            />
+            <div id={REGION_ID} className="absolute inset-0 [&_video]:size-full [&_video]:object-cover" />
             {!scanning && (
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 text-navy-foreground">
                 <ScanLine className="size-10 opacity-70" />
@@ -288,7 +268,11 @@ function ScanPage() {
 
 function ScanResult({ state }: { state: ScanState }) {
   if (state.kind === "idle") {
-    return <div className="panel p-5 text-sm text-muted-foreground">Waiting for a badge scan…</div>;
+    return (
+      <div className="panel p-5 text-sm text-muted-foreground">
+        Waiting for a badge scan…
+      </div>
+    );
   }
   if (state.kind === "checking") {
     return (
