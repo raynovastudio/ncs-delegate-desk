@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -181,6 +181,13 @@ function AuthPage() {
               </form>
             </TabsContent>
           </Tabs>
+
+          <p className="mt-6 text-center text-sm text-muted-foreground">
+            First time here?{" "}
+            <Link to="/setup" className="text-primary underline underline-offset-4">
+              Create admin account
+            </Link>
+          </p>
         </div>
       </div>
     </div>
