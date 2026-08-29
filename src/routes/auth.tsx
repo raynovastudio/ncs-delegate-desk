@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { HeartPulse, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -72,8 +72,8 @@ function AuthPage() {
     <div className="flex min-h-screen flex-col lg:flex-row">
       <div className="surface-navy grid-lines relative flex flex-col justify-between px-6 py-10 lg:w-[46%] lg:px-14 lg:py-16">
         <div className="flex items-center gap-3">
-          <span className="flex size-11 items-center justify-center rounded-xl bg-navy-foreground/10 ring-1 ring-navy-foreground/20">
-            <HeartPulse className="size-6 text-navy-foreground" />
+          <span className="flex size-11 items-center justify-center rounded-xl bg-navy-foreground/10 ring-1 ring-navy-foreground/20 overflow-hidden">
+            <img src="/Logo.png" alt="NCS Logo" className="size-8 object-contain" />
           </span>
           <span className="font-display text-sm font-semibold uppercase tracking-[0.2em] text-navy-foreground/80">
             {CONFERENCE.society}

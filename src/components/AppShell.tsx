@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { HeartPulse, LayoutDashboard, LogOut, ScanLine } from "lucide-react";
+import { LayoutDashboard, LogOut, ScanLine } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -20,8 +20,8 @@ export function AppShell({ children, email }: { children: ReactNode; email?: str
       <header className="surface-navy grid-lines sticky top-0 z-40 border-b border-sidebar-border">
         <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-3 sm:px-6 md:flex-row md:items-center md:justify-between">
           <Link to="/" className="flex items-center gap-3">
-            <span className="flex size-10 items-center justify-center rounded-xl bg-navy-foreground/10 ring-1 ring-navy-foreground/20">
-              <HeartPulse className="size-5 text-navy-foreground" />
+            <span className="flex size-10 items-center justify-center rounded-xl bg-navy-foreground/10 ring-1 ring-navy-foreground/20 overflow-hidden">
+              <img src="/Logo.png" alt="NCS Logo" className="size-8 object-contain" />
             </span>
             <span className="leading-tight">
               <span className="block font-display text-sm font-semibold tracking-tight text-navy-foreground">
