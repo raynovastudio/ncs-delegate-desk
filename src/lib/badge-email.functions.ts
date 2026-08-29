@@ -21,6 +21,8 @@ export const sendBadgeEmail = createServerFn({ method: "POST" })
     }) => input,
   )
   .handler(async ({ data }): Promise<BadgeEmailResult> => {
+    console.log("[sendBadgeEmail] Starting...", { to: data.to, name: data.fullName });
+
     const origin = data.origin.replace(/\/$/, "");
     const result = await sendBadgeMail({
       to: data.to,
@@ -31,5 +33,6 @@ export const sendBadgeEmail = createServerFn({ method: "POST" })
       idempotencyKey: `badge-${data.participantId}`,
     });
 
+    console.log("[sendBadgeEmail] Result:", JSON.stringify(result));
     return result;
   });
