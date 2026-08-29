@@ -26,17 +26,21 @@ export async function sendBadgeMail(input: BadgeMailInput): Promise<BadgeEmailRe
     };
   }
 
-  const from = process.env["EMAIL_FROM"] || "NCS Delegate Desk <badges@nigeriancardiacsociety.com>";
+  const from = process.env["EMAIL_FROM"] || "NCS Delegate Desk <onboarding@resend.dev>";
 
   try {
-    await resend.emails.send({
+    const { data, error } = await resend.emails.send({
       from,
       to: input.to,
       subject: `Your NCS EKO 2026 Delegate Badge — ${input.registrationCode}`,
       html: buildBadgeHtml(input),
     });
+    if (error) {
+      return { sent: false, reason: "error", message: error.message || "Resend API error" };
+    }
     return { sent: true };
   } catch (error) {
+    console.error("[BadgeEmail] Send failed:", error);
     const message = error instanceof Error ? error.message : "Email delivery failed";
     return { sent: false, reason: "error", message };
   }
