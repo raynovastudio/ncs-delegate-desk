@@ -40,7 +40,6 @@ export async function sendBadgeMail(input: BadgeMailInput): Promise<BadgeEmailRe
     }
     return { sent: true };
   } catch (error) {
-    console.error("[BadgeEmail] Send failed:", error);
     const message = error instanceof Error ? error.message : "Email delivery failed";
     return { sent: false, reason: "error", message };
   }
